@@ -1,0 +1,263 @@
+<html>
+<canvas width="600" height="400"></canvas>
+<audio id="ponto" src="pong_sons/ponto.mp3"></audio>
+<audio id="raquetada" src="pong_sons/raquetada.mp3"></audio>
+<audio id="trilha" autoplay loop preload="auto"> 
+	<source src="pong_sons/trilha.mp3" type="audio/mpeg">
+</audio>
+<script>
+
+function drawCircle(){
+
+	ctx.beginPath();
+	ctx.fillStyle = "white";
+	ctx.strokeStyle = "grey";
+	ctx.arc(xCircle, yCircle, raio, 0, 2 * 3.14);
+	ctx.fill();
+	ctx.stroke();
+}
+
+function moveCircle(){
+
+	xCircle += directionX;
+	yCircle += directionY;
+
+
+}
+
+function checkBorderCollision(){
+
+	if(xCircle > 600 - raio || xCircle < 0 + raio){
+
+		directionX *= -1;
+
+	}
+
+	if(yCircle > 400 - raio || yCircle < 0 + raio){
+
+		directionY *= -1;
+
+	}
+
+}
+
+function clearScreen(){
+
+	ctx.fillStyle = "black";
+	ctx.fillRect(0, 0, 600, 400);
+}
+
+function refreshScreen(){
+	clearScreen();
+	drawRacket(xRacket, yRacket);
+	drawRacket(xEnemy, yEnemy);
+	moveEnemyRacket();
+	drawCircle();
+	moveCircle();
+	checkBorderCollision();
+	checkRacketCollision(xRacket, yRacket);
+	checkEnemyCollision(xEnemy, yEnemy);
+	showScore(myScore, 145, 35);
+	showScore(enemyscore, 400, 35)
+	checkScore();
+
+	
+	
+}
+
+function drawRacket(x, y){
+
+	ctx.fillStyle = "white";
+	ctx.fillRect(x, y, 10, 90);
+}
+
+function moveRacket(event){
+
+	if(event.keyCode == arrowUp){
+		yRacket -= movementY; 
+	}  
+
+	if(event.keyCode == arrowDown){
+		yRacket += movementY;		
+	}
+
+	if(yRacket <= 0){
+
+		yRacket = 0;
+
+	} else if (yRacket + 90 >= 400){
+
+		yRacket = 400 - 90;
+	}
+	
+}
+
+const moveEnemyRacket = () => {
+	if(yCircle >= 0){
+
+		yEnemy = yCircle - 45 - 58;
+
+		if(yEnemy <= 0){
+			yEnemy = 0;
+		} 
+
+		if(yEnemy + 90 >= 400){
+			yEnemy = 310;
+		}
+	}
+
+
+}
+
+function moveRacketWithMouse(event){
+
+	var y = event.pageY - canvas.offsetTop;
+	
+	if(click){
+
+		yRacket = y - 45;
+	}
+
+	if(yRacket <= 0){
+
+		yRacket = 0;
+
+	} else if (yRacket + 90 >= 400){
+	
+		yRacket = 310;
+	}
+
+}
+
+function onMouseUp(){
+
+	click = false;
+}
+
+function onMouseDown(){
+
+	click = true;
+}
+
+function checkRacketCollision(x, y){
+
+		if(xCircle - raio <= x + 10){
+
+			if(y + 90 >= yCircle - raio && y <= yCircle + raio){
+				directionX *= -1;
+				racketCollision();
+
+			}
+		}
+
+
+
+}
+
+const checkEnemyCollision = (x, y) => {
+
+	if(xCircle + raio >= x){
+
+			if(y + 90 >= yCircle - raio && y <= yCircle + raio){
+				directionX *= -1;
+				racketCollision();
+
+			}
+		}
+
+}
+
+function showScore(text, x, y) {
+	ctx.fillStyle = "orange";
+	ctx.fillRect(x - 25, y - 20, 60, 25);
+	ctx.strokeStyle = "white";
+	ctx.strokeRect(x - 25, y - 20, 60, 25);
+
+	ctx.fillStyle = "black";
+	ctx.font = "20px Arial";
+	ctx.fillText(text, x, y);
+
+
+}
+
+function checkScore() {
+	if(xCircle - raio < 0){
+		score();
+		enemyscore += 1;
+		
+	}
+
+	if(xCircle + raio > 600){
+		score();
+		myScore += 1;
+	
+	}
+}
+
+//background variables
+var canvas = document.querySelector("canvas");
+var ctx = canvas.getContext("2d");
+ctx.fillStyle = "black";
+ctx.fillRect(0, 0, 600, 400);
+
+//circle variables
+var xCircle = 300;
+var yCircle = 200;
+var raio = 10;
+
+//circle direction variables
+var directionX = 2;
+var directionY = 2;
+
+
+//racket variables
+var xRacket = 5;
+var yRacket = 170;
+var movementY = 30;
+
+
+
+//racket direction variables and properties
+var arrowUp = 38;
+var arrowDown = 40;
+	
+	//keyboard properties
+	document.onkeydown = moveRacket;
+
+	//mouse variables and properties
+	var click = false;
+	canvas.onmousedown = onMouseDown;
+	canvas.onmouseup = onMouseUp;
+	canvas.onmousemove = moveRacketWithMouse;
+
+//enemy racket variables
+let xEnemy = 585;
+let yEnemy = 170;
+
+//score
+let myScore = 0;
+let enemyscore = 0;
+
+//sounds
+
+//let score = new Audio('pong_sons/ponto.mp3');
+let score = () => {
+  
+ 	return document.querySelector("#ponto").play();
+
+}
+
+let racketCollision = () => {
+
+	return document.querySelector("#raquetada").play();
+}
+
+
+//document.addEventListener("keydown", moveRacket);
+
+setInterval(refreshScreen, 1);
+
+
+
+</script>
+</html>
